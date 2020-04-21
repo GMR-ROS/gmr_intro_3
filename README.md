@@ -70,7 +70,7 @@ Adicionar um publicador como membro privado:
 
 Se lembrarmos das equações, temos `dt`, que é o tempo entre duas execuções consecutivas dos cálculos de odometria. Portanto, precisamos guardar o tempo (*timestamp*) da última execução e, assim, obter o valor de tempo decorrido `dt`. Portanto, mais um atributo privado:
 ```cpp
-        double _prev_timestamp;
+        ros::Time _prev_timestamp;
 ```
 Além disso, as equações de cinemática acumulam a decomposição dos incrementos de velocidade por um tempo dt numa direção &theta; em x, y e &theta;. Assim, por conveniência, criaremos uma struct para armazenar esses valores:
 ```cpp
@@ -87,26 +87,26 @@ Vamos agora editar a implementação da classe, portanto o arquivo gmr_intro_poo
 ```cpp
     _pub_odom = _nh->advertise<nav_msgs::Odometry>("/odom", 1);
     _robot_pose = (const struct RobotPose) { 0 };
-    _prev_timestamp = ros::Time::now().toSec();
+    _prev_timestamp = ros::Time::now();
 ```
 
- Informamos ao master que publicaremos uma mensagem do tipo <nav_msgs::Odometry> no tópico "/odom". E o segundo argumento indica o tamanho da fila de publicação. No nosso caso, queremos que o resto dos nós tenha acesso à informação mais atual possível, então colocamos 1. Note a inicialização de _robot_pose. É uma forma bastante compacta e funcional de inicializar uma struct com zeros. O valor de _prev_timestamp é iniciado com o tempo atual fornecido pelo tópico /clock de ROS. Em alguns casos é interessante utilizar `ros::WallTime::now().toSec()` porque como o próprio nome diz, utiliza o relógio de parede, portanto sincronizado com o tempo corrente. Já `ros::Time` utiliza /clock, que é facilmente manipulável. Um exemplo é a reprodução de rosbag, os arquivos de log de ROS. Na chamada de `rosbag play` e com o argumento `--clock`, é como se a máquina voltasse no tempo em que a rosbag for gravada. Com o argumento `-r 10`, a rosbag é reproduzida 10 vezes mais rápida. Além disso, é possível publicar no tópico /clock. Como o cálculo de `dt` é no mesmo tempo do conhecimento da velocidade dos motores, então deixaremos em `ros::Time` que serve tanto para uma execução em tempo corrente quanto manipulado. 
+ Informamos ao master que publicaremos uma mensagem do tipo <nav_msgs::Odometry> no tópico "/odom". E o segundo argumento indica o tamanho da fila de publicação. No nosso caso, queremos que o resto dos nós tenha acesso à informação mais atual possível, então colocamos 1. Note a inicialização de _robot_pose. É uma forma bastante compacta e funcional de inicializar uma struct com zeros. O valor de _prev_timestamp é iniciado com o tempo atual fornecido pelo tópico /clock de ROS. Em alguns casos é interessante utilizar `ros::WallTime::now()` porque como o próprio nome diz, utiliza o relógio de parede, portanto sincronizado com o tempo corrente. Já `ros::Time` utiliza /clock, que é facilmente manipulável. Um exemplo é a reprodução de rosbag, os arquivos de log de ROS. Na chamada de `rosbag play` e com o argumento `--clock`, é como se a máquina voltasse no tempo em que a rosbag for gravada. Com o argumento `-r 10`, a rosbag é reproduzida 10 vezes mais rápida. Além disso, é possível publicar no tópico /clock. Como o cálculo de `dt` é no mesmo tempo do conhecimento da velocidade dos motores, então deixaremos em `ros::Time` que serve tanto para uma execução em tempo corrente quanto manipulado. 
  
  Vamos agora criar o método com as equações que obtemos em [gmr_intro_2](https://github.com/akihirohh/gmr_intro_2):
 
 ```cpp
 void RobotClass::calculateOdom()
 {
-    double cur_timestamp = ros::Time::now().toSec();
+    ros::Time cur_timestamp = ros::Time::now();
     double vl = _vel_m_s.left;
     double vr = _vel_m_s.right;
     double dt, wz, vx;
     nav_msgs::Odometry odom;
     tf2::Quaternion odom_quat;
 
-    dt = cur_timestamp - _prev_timestamp;
+    dt = cur_timestamp.toSec() - _prev_timestamp.toSec();
     _prev_timestamp = cur_timestamp;
-    vx = 0.5*(vr - vl); // Eq. 1                     
+    vx = 0.5*(vr + vl); // Eq. 1                     
     wz = (vr - vl)/_params.axle_track; // Eq.2
     _robot_pose.theta += wz*dt; // Eq. 8
     _robot_pose.x += vx*std::cos(_robot_pose.theta)*dt; // Eq. 6
