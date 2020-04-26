@@ -58,7 +58,7 @@ Em gmr_intro_poo/include/gmr_intro_poo/gmr_intro_poo.hpp, vamos adicionar duas b
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 ```
 
-Faremos um loop explícito para o cálculo da odometria e sua publicação. O loop ficará em mr_intro_poo_node.cpp, portanto adicionaremos um método público para realizar os cálculos de odometria e publicá-la:
+Faremos um loop explícito para o cálculo da odometria e sua publicação. O loop ficará em gmr_intro_poo_node.cpp, portanto adicionaremos um método público para realizar os cálculos de odometria e publicá-la:
 ```cpp
         void calculateOdom();
 ```
@@ -117,7 +117,7 @@ void RobotClass::calculateOdom()
     odom.twist.twist.angular.z = wz;
     odom.twist.twist.linear.x = vx;
     odom.pose.pose.position.x = _robot_pose.x;
-    odom.pose.pose.position.y = _robot_pose.x;
+    odom.pose.pose.position.y = _robot_pose.y;
     odom.pose.pose.orientation = tf2::toMsg(odom_quat);
     _pub_odom.publish(odom);
 }
