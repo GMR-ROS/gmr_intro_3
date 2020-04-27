@@ -1,12 +1,12 @@
 # Introdução de ROS e robôs móveis terrestres
 
-Até o momento, fizemos o [primeiro subscritor](https://github.com/akihirohh/gmr_intro), mexemos com [parâmetros e roslaunch](https://github.com/akihirohh/gmr_intro_1) e vimos o [uso de POO em ROS](https://github.com/akihirohh/gmr_intro_2) quando fizemos a classe *RobotClass*. Agora utilizaremos as equações do robô diferencial para saber o estado do robô, seja em velocidade ou posição. 
+Até o momento, fizemos o [primeiro subscritor](https://bitbucket.org/grupomecatronica/gmr_intro), mexemos com [parâmetros e roslaunch](https://bitbucket.org/grupomecatronica/gmr_intro_1) e vimos o [uso de POO em ROS](https://bitbucket.org/grupomecatronica/gmr_intro_2) quando fizemos a classe *RobotClass*. Agora utilizaremos as equações do robô diferencial para saber o estado do robô, seja em velocidade ou posição. 
 
 ## Publicador ROS
 
 Faremos um publicador para disponibilizar a odometria, o estado do robô (posição e velocidade). Lembre-se da modularidade de ROS então queremos nós menores mas vários em paralelo. Assim, não faria sentido fazer o controle ou qualquer outra atividade que dependa da odometria dentro do mesmo nó. Opte, sempre que possível, pela interface subscritor-publicador. 
 
-Utilizaremos o pacote *gmr_intro_poo* que começamos em [gmr_intro_2](https://github.com/akihirohh/gmr_intro_2). Vamos editar a nossa classe primeiro. Queremos publicar odometria portanto devemos criar um publicador de mensagens de tal tipo. Felizmente, já há uma mensagem padrão [nav_msgs/Odometry](http://docs.ros.org/melodic/api/nav_msgs/html/msg/Odometry.html), cuja definição compacta é:
+Utilizaremos o pacote *gmr_intro_poo* que começamos em [gmr_intro_2](https://bitbucket.org/grupomecatronica/gmr_intro_2). Vamos editar a nossa classe primeiro. Queremos publicar odometria portanto devemos criar um publicador de mensagens de tal tipo. Felizmente, já há uma mensagem padrão [nav_msgs/Odometry](http://docs.ros.org/melodic/api/nav_msgs/html/msg/Odometry.html), cuja definição compacta é:
 
 ```
 std_msgs/Header header
@@ -49,7 +49,7 @@ geometry_msgs/TwistWithCovariance twist
   float64[36] covariance
 ```
 
-Trata-se de uma estrutura de dados, então se tivermos um `nav_msgs::Odometry odom`, para acessar a posição x devemos utilizar `odom.pose.pose.position.x`, por exemplo. Observe que `odom.pose.pose.orientation` é um [geometry_msgs/Quaternion](http://docs.ros.org/melodic/api/geometry_msgs/html/msg/Quaternion.html), ou seja, quando quisermos definir a orientação do robô no espaço (a direção dele no plano, por exemplo), precisamos trabalhar com a forma de representação de quaternion. Um estudo à parte sobre quaternions e ângulos de Euler é interessante, porém para o objetivo de representar como o robô se encontra no espaço 2D só precisamos nos preocupar com a guinada/*yaw*, o ângulo de Euler relacionado à direção que o robô aponta. Tal ângulo foi descrito como &theta; em [gmr_intro_2](https://github.com/akihirohh/gmr_intro_2). Após os cálculos, [tf2](http://wiki.ros.org/tf2/Tutorials/Quaternions) fornece um método útil para a conversão de Euler para quaternion. 
+Trata-se de uma estrutura de dados, então se tivermos um `nav_msgs::Odometry odom`, para acessar a posição x devemos utilizar `odom.pose.pose.position.x`, por exemplo. Observe que `odom.pose.pose.orientation` é um [geometry_msgs/Quaternion](http://docs.ros.org/melodic/api/geometry_msgs/html/msg/Quaternion.html), ou seja, quando quisermos definir a orientação do robô no espaço (a direção dele no plano, por exemplo), precisamos trabalhar com a forma de representação de quaternion. Um estudo à parte sobre quaternions e ângulos de Euler é interessante, porém para o objetivo de representar como o robô se encontra no espaço 2D só precisamos nos preocupar com a guinada/*yaw*, o ângulo de Euler relacionado à direção que o robô aponta. Tal ângulo foi descrito como &theta; em [gmr_intro_2](https://bitbucket.org/grupomecatronica/gmr_intro_2). Após os cálculos, [tf2](http://wiki.ros.org/tf2/Tutorials/Quaternions) fornece um método útil para a conversão de Euler para quaternion. 
 
 Em gmr_intro_poo/include/gmr_intro_poo/gmr_intro_poo.hpp, vamos adicionar duas bibliotecas. Uma relacionada à mensagem que utilizaremos e outras com funções úteis para conversão de ângulos de Euler para quaternion:
 ```cpp
@@ -92,7 +92,7 @@ Vamos agora editar a implementação da classe, portanto o arquivo gmr_intro_poo
 
  Informamos ao master que publicaremos uma mensagem do tipo <nav_msgs::Odometry> no tópico "/odom". E o segundo argumento indica o tamanho da fila de publicação. No nosso caso, queremos que o resto dos nós tenha acesso à informação mais atual possível, então colocamos 1. Note a inicialização de _robot_pose. É uma forma bastante compacta e funcional de inicializar uma struct com zeros. O valor de _prev_timestamp é iniciado com o tempo atual fornecido pelo tópico /clock de ROS. Em alguns casos é interessante utilizar `ros::WallTime::now()` porque como o próprio nome diz, utiliza o relógio de parede, portanto sincronizado com o tempo corrente. Já `ros::Time` utiliza /clock, que é facilmente manipulável. Um exemplo é a reprodução de rosbag, os arquivos de log de ROS. Na chamada de `rosbag play` e com o argumento `--clock`, é como se a máquina voltasse no tempo em que a rosbag for gravada. Com o argumento `-r 10`, a rosbag é reproduzida 10 vezes mais rápida. Além disso, é possível publicar no tópico /clock. Como o cálculo de `dt` é no mesmo tempo do conhecimento da velocidade dos motores, então deixaremos em `ros::Time` que serve tanto para uma execução em tempo corrente quanto manipulado. 
  
- Vamos agora criar o método com as equações que obtemos em [gmr_intro_2](https://github.com/akihirohh/gmr_intro_2):
+ Vamos agora criar o método com as equações que obtemos em [gmr_intro_2](https://bitbucket.org/grupomecatronica/gmr_intro_2):
 
 ```cpp
 void RobotClass::calculateOdom()
@@ -162,4 +162,4 @@ Em outra sessão de terminal, confira o resultado do tópico "/odom" com
 ```console
 user@pc:~/: $rostopic echo /odom
 ```
-Os códigos estão disponíveis em [gmr_intro_poo](https://github.com/akihirohh/gmr_intro_poo) no branch gmr_intro_3. Com isso, a nossa classe RobotClass adquiriu um publicador. Implementamos as equações de cinemática de robô com tração diferencial e temos a odometria disponível. No próximo tutorial, veremos sobre serviços.
+Os códigos estão disponíveis em [gmr_intro_poo](https://bitbucket.org/grupomecatronica/gmr_intro_poo) no branch gmr_intro_3. Com isso, a nossa classe RobotClass adquiriu um publicador. Implementamos as equações de cinemática de robô com tração diferencial e temos a odometria disponível. No próximo tutorial, veremos sobre serviços.
