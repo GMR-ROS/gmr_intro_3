@@ -163,3 +163,6 @@ Em outra sessão de terminal, confira o resultado do tópico "/odom" com
 user@pc:~/: $rostopic echo /odom
 ```
 Os códigos estão disponíveis em [gmr_intro_poo](https://bitbucket.org/grupomecatronica/gmr_intro_poo) no branch gmr_intro_3. Com isso, a nossa classe RobotClass adquiriu um publicador. Implementamos as equações de cinemática de robô com tração diferencial e temos a odometria disponível. No próximo tutorial, veremos sobre serviços.
+
+
+Contato: Akihiro (akihirohh@gmail.com)
